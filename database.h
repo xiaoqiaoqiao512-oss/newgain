@@ -4,6 +4,8 @@
 #include <vector>
 #include <map>
 #include "user.h"
+#include "news.h"
+#include"json.hpp"
 
 //using to manage user database
 class Database {
@@ -25,6 +27,18 @@ class Database {
 
     //clear all users
     void clearAllUsers();
+
+    //save news to file
+    bool saveNewsToFile(const std::string& filename, const std::vector<News>& newsList);
+    //load news from file
+    std::vector<News> loadNewsFromFile(const std::string& filename);
+
+    //search news by title
+    bool searchNewsByName(const std::string& title, std::vector<News>& result);
+
+    //the news which be loved by users
+    void saveFavoriteNews(const std::vector<News>& news, const std::string& filename);
+    std::vector<News> getFavoriteNews(const std::string name, const std::string& filename);
 };
 
 #endif

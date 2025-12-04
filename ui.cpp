@@ -31,7 +31,7 @@ User* ui::userSignIn(){
     std::cin>>age;
     std::cout<<"please enter your sexyty:(m/f) ";
     std::cin>>sexyty;
-
+    
     //add new user to database
     db.addUser(User(username, age, sexyty));
     return db.findUser(username);
@@ -46,13 +46,15 @@ void ui::showMenu(){
         std::cout<<"2. View User information"<<std::endl;
         std::cout<<"3. View Self recommended News"<<std::endl;
         std::cout<<"4. Find other users"<<std::endl;
-        std::cout<<"5. Exit"<<std::endl;
-        std::cout<<"Please enter your choice (1-5): ";
+        std::cout<<"5. adjust User information"<<std::endl;
+        std::cout<<"6. Search News by Title"<<std::endl;
+        std::cout<<"7. Exit"<<std::endl;
+        std::cout<<"Please enter your choice (1-7): ";
         int choice;
         std::cin>>choice;
         handselfchoice(choice);
 
-        if(choice == 5) break;
+        if(choice == 7) break;
     }
 }
 
@@ -72,6 +74,7 @@ void ui::handselfchoice(int choice){
         case 3:
             {
                 ViewSelfRconmendedNews();
+                saveFavorite();
                 break;
             }
         case 4:
@@ -80,6 +83,16 @@ void ui::handselfchoice(int choice){
                 break;
             }
         case 5:
+            {
+                updateUserInfo();
+                break;
+            }
+        case 6:
+            {
+                searchnews();
+                break;
+            }
+        case 7:
             {
                 std::cout<<"Exiting the system. Goodbye!"<<std::endl;
                 break;
@@ -163,6 +176,27 @@ void ui::ViewSelfRconmendedNews(){
     }
 }
 
+//save favorite news
+void ui::saveFavorite(){
+    std::cout<<"Would you like to save any favorite news? (yes/no): ";
+    std::string choice;
+    std::cin>>choice;
+    if(choice == "yes"){
+        std::cout<<"Please enter the title keyword of the news you want to save: ";
+        std::string titleKeyword;
+        std::cin>>titleKeyword;
+        std::vector<News> result;
+        if(db.searchNewsByName(titleKeyword,result)){
+            db.saveFavoriteNews(result, user->getName() + "_favorites.json");
+            std::cout<<"Favorite news saved successfully!"<<std::endl;
+        } else {
+            std::cout<<"No news found with the given title keyword."<<std::endl;
+        }
+    } else {
+        std::cout<<"No favorite news saved."<<std::endl;
+    }
+}
+
 //a easy code to find other users
 void ui::findOtherUsers(){
     std::cout<<"Finding other users with similar interests..."<<std::endl;
@@ -208,7 +242,23 @@ void ui::updateUserInfo(){
 
     // 可以清空兴趣再重新添加
     user->getInterestingThing().clear();
+    std::cout<<"intersting things will be reset"<<std::endl;
     addInterestingThings();
 
     db.updateUser(*user);
+}
+
+void ui::searchnews(){
+    std::cout<<"please enter the news title you want to search: ";
+    std::string title;
+    std::cin>>title;
+    std::vector<News> result;
+    if(db.searchNewsByName(title,result)){
+        std::cout<<"Search results:"<<std::endl;
+        for(const auto& news:result){
+            news.printNews();
+        }
+    } else {
+        std::cout<<"please change your search!"<<title<<std::endl;
+    }
 }

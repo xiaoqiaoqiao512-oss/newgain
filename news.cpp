@@ -96,7 +96,19 @@ std::vector<News> News::parseNewsJson(const std::string& NewsJson){
         auto j = json::parse(NewsJson);
 
         //check if json contains news array
-        if(j.contains("status")&&j["status"]==0){
+        if(j.contains("status")){
+            int statusVal = -1;
+            try{
+                if(j["status"].is_number()){
+                    statusVal = j["status"].get<int>();
+                } else if(j["status"].is_string()){
+                    statusVal = std::stoi(j["status"].get<std::string>());
+                }
+            } catch(...) {
+                statusVal = -1;
+            }
+
+            if(statusVal == 0){
             auto newsArray = j["result"]["list"];
             for(const auto& item : newsArray){
                 std::string cleanedContent = cleanText(item.value("content",""));
@@ -111,9 +123,12 @@ std::vector<News> News::parseNewsJson(const std::string& NewsJson){
                 );
                 newlsit.push_back(news);
             }
+            } else {
+                //if status is not 0, print error message
+                std::cerr << "Error: API returned status " << j["status"] << std::endl;
+            }
         } else {
-            //if status is not 0, print error message
-            std::cerr << "Error: API returned status " << j["status"] << std::endl;
+            std::cerr << "Error: API response does not contain 'status' field" << std::endl;
         }
     }
     catch(const json::parse_error& e){

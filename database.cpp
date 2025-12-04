@@ -149,3 +149,93 @@ void Database::clearAllUsers(){
     std::cout<<"All users cleared successfully!"<<std::endl;
 }
 
+//save news to file
+bool Database::saveNewsToFile(const std::string& filename, const std::vector<News>& newsList) {
+    nlohmann::json j;
+    
+    for (const auto& n : newsList) {
+        j["news"].push_back({
+            {"id", n.id},
+            {"title", n.title},
+            {"category", n.category},
+            {"author", n.author},
+            {"date", n.publishDate},
+            {"origin", n.origin},
+            {"content", n.content}
+        });
+    }
+
+    std::ofstream outFile(filename, std::ios::app);
+    if (!outFile.is_open()) return false;
+
+    outFile << j.dump(4);  // 美化 JSON
+    return true;
+}
+
+
+//load news from file
+std::vector<News> Database::loadNewsFromFile(const std::string& filename) {
+    std::vector<News> list;
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cout << "Cannot open " << filename << std::endl;
+        return list;
+    }
+
+    nlohmann::json j;
+    file >> j;
+
+    for (const auto& item : j["news"]) {
+        News news(
+            item.value("id", 0),
+            item.value("title", ""),
+            item.value("content", ""),
+            item.value("author", ""),
+            item.value("category", ""),
+            item.value("date", ""),
+            item.value("origin", "")
+        );
+        list.push_back(news);
+    }
+
+    return list;
+}
+
+bool Database::searchNewsByName(const std::string& title, std::vector<News>& result){
+    result.clear();
+    for(const auto& News:result){
+        if(News.getTitle().find(title)!=std::string::npos){
+            result.push_back(News);
+        }
+    }
+    if(result.empty()){
+        std::cout<<"No news found with title containing: "<<title<<std::endl;
+        return false;
+    }
+    return true;
+}
+
+void Database::saveFavoriteNews(const std::vector<News>& news, const std::string& filename){
+    nlohmann::json j;
+    for(const auto& News:news){
+        if(News.getTitle().find(filename)!=std::string::npos){
+            j["favorites"].push_back({
+                {"id", News.id},
+                {"title", News.title},
+                {"category", News.category},
+                {"author", News.author},
+                {"date", News.publishDate},
+                {"origin", News.origin},
+                {"content", News.content}
+            });
+            std::ofstream outFile(filename, std::ios::app);
+            if(!outFile.is_open()){
+                std::cout<<"Cannot open "<<filename<<std::endl;
+                return;
+            }
+            outFile << j.dump(4);
+            outFile.close();
+            }
+    }
+}
