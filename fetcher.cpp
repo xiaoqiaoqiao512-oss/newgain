@@ -53,7 +53,7 @@ std::string FETCHER::NewsFetcher(){
             lastErrorMessage = curl_easy_strerror(res);
         }
 
-        if (status_code != 200) {
+        if (status_code != 0) {
             lastStatusCode = status_code;
             lastErrorMessage = "HTTP error code: " + std::to_string(status_code);
             //check http status code

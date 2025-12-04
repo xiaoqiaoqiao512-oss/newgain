@@ -18,7 +18,7 @@ int main(){
     
     FETCHER fetcher;
     std::string newsJson = fetcher.NewsFetcher();
-    if (fetcher.getLastStatusCode() != 200) {
+    if (fetcher.getLastStatusCode() != 0) {
         std::cerr << "Failed to fetch news: " << fetcher.getLastErrorMessage() << std::endl;
         return 1;
     }
@@ -26,12 +26,13 @@ int main(){
     std::vector<News> newslist = News::parseNewsJson(newsJson);
     //load user database from file
     Database db;
+    db.saveNewsToFile("news_data.json", newslist);
     if(!db.loadFromFile("user_database.txt")){
         std::cout<<"No existing database found. Starting with an empty database."<<std::endl;
     }
 
-
-    ui Ui(newslist, db);
+    std::vector<News> loadedNews = db.loadNewsFromFile("news_data.json");
+    ui Ui(loadedNews, db);
     User* signedInUser = Ui.userSignIn();
 
     if (!signedInUser) {

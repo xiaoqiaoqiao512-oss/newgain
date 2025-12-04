@@ -2,6 +2,7 @@
 #define UI_H
 
 #include<iostream>
+#include<filesystem>
 #include"user.h"
 #include"news.h"
 #include"database.h"
@@ -25,6 +26,8 @@ class ui{
         User* userSignIn();
         void findOtherUsers();
         void updateUserInfo();
+        void searchnews();
+        void saveFavorite();
 
         //destructor to clean up user pointer
         ~ui() {
